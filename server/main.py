@@ -10,11 +10,14 @@ app = Flask(__name__)
 def hello():
     return jsonify({'message': 'Welcome to the Space Launch API!'}), 200
 
+# Load dataset
 data = pd.read_csv('dataset/launches.csv', encoding='latin1')
 
+# Encode orbit types
 le_orbit = LabelEncoder()
 data['Orbit_Type_Encoded'] = le_orbit.fit_transform(data['Orbit Type'].fillna('Unknown'))
 
+# Function to predict orbit location based on orbit type and application
 def predict_location(orbit_type):
     if orbit_type == 'Earth Observation':
         return 'Low Earth Orbit'
@@ -59,22 +62,23 @@ def update_launch(id):
     else:
         return jsonify({'message': 'Launch not found'}), 404
 
-# New endpoint to generate a graph of satellite names and their predicted orbit locations
-@app.route('/plot-orbits', methods=['GET'])
-def plot_orbit_predictions():
-    # Filter data to include launches with valid Orbit Type
-    valid_data = data[~data['Orbit Type'].isna()]
+# New endpoint to generate a graph of Earth-related satellites and their predicted orbit locations
+@app.route('/plot-earth-orbits', methods=['GET'])
+def plot_earth_orbit_predictions():
+    # Filter data for satellites around Earth (e.g., Earth Observation, Navigation)
+    earth_orbits = ['Low Earth Orbit', 'Geostationary Orbit', 'Medium Earth Orbit']  # Add more if needed
+    earth_satellites = data[data['Orbit Type'].isin(earth_orbits)]
     
-    # Create a list to store satellite names and their predicted orbits
-    satellite_names = valid_data['Launch Vehicle'].tolist()
-    orbit_predictions = valid_data['Orbit Type'].apply(predict_location).tolist()
+    # Create lists for satellite names and predicted orbits
+    satellite_names = earth_satellites['Launch Vehicle'].tolist()
+    orbit_predictions = earth_satellites['Orbit Type'].apply(predict_location).tolist()
     
     # Plot the graph using matplotlib
     plt.figure(figsize=(10, 6))
-    plt.barh(satellite_names, orbit_predictions, color='blue')
+    plt.barh(satellite_names, orbit_predictions, color='green')
     plt.xlabel('Predicted Orbit')
     plt.ylabel('Satellite Name')
-    plt.title('Satellite Names and Predicted Orbit Locations')
+    plt.title('Earth Satellites and Predicted Orbit Locations')
 
     # Save the plot to an in-memory buffer
     img = io.BytesIO()
