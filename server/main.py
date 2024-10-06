@@ -10,7 +10,6 @@ def hello():
 
 data = pd.read_csv('dataset/launches.csv', encoding='latin1')
 
-
 le_orbit = LabelEncoder()
 data['Orbit_Type_Encoded'] = le_orbit.fit_transform(data['Orbit Type'].fillna('Unknown'))
 
@@ -56,6 +55,16 @@ def update_launch(id):
         return jsonify({'message': 'Launch location updated successfully'}), 200
     else:
         return jsonify({'message': 'Launch not found'}), 404
+
+@app.route('/earth-orbit-satellites', methods=['GET'])
+def get_earth_orbit_satellites():
+    earth_orbit_satellites = data[data['Orbit Type'].isin(['Low Earth Orbit', 'Geostationary Orbit'])]
+    return earth_orbit_satellites.to_json(orient='records'), 200
+
+@app.route('/earth-applications', methods=['GET'])
+def get_earth_applications():
+    earth_applications = data[data['Application'].str.contains('Earth', case=False, na=False)]
+    return earth_applications.to_json(orient='records'), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
