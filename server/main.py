@@ -5,7 +5,7 @@ import io
 
 app = Flask(__name__)
 
-# Mock dataset for launches
+# Load the dataset (make sure this path is correct for your environment)
 data = pd.read_csv('dataset/launches.csv', encoding='latin1')
 
 # Function to predict orbit location based on orbit type
@@ -20,12 +20,15 @@ def predict_location(orbit_type):
 # Endpoint to predict orbit location for a single launch
 @app.route('/predict', methods=['POST'])
 def predict():
+    # Extract data from the request
     data_input = request.json
     orbit_type = data_input.get('Orbit Type')
     launch_vehicle = data_input.get('Launch Vehicle')
+    
+    # Call the function to predict location
     predicted_location = predict_location(orbit_type)
     
-    # Return the prediction
+    # Return the response as JSON
     return jsonify({
         'Launch Vehicle': launch_vehicle,
         'predicted_location': predicted_location
@@ -34,6 +37,7 @@ def predict():
 # Endpoint to plot the orbit prediction for a single satellite
 @app.route('/plot-prediction', methods=['POST'])
 def plot_prediction():
+    # Extract data from the request
     data_input = request.json
     launch_vehicle = data_input.get('Launch Vehicle')
     orbit_type = data_input.get('Orbit Type')
@@ -41,20 +45,20 @@ def plot_prediction():
     # Predict the location using the predict function
     predicted_location = predict_location(orbit_type)
 
-    # Create the bar graph with the satellite name and predicted orbit
+    # Create a bar chart
     plt.figure(figsize=(8, 4))
-    plt.barh(launch_vehicle, predicted_location, color='blue')
+    plt.barh([launch_vehicle], [predicted_location], color='blue')
     plt.xlabel('Predicted Orbit')
-    plt.ylabel('Satellite Name')
+    plt.ylabel('Launch Vehicle')
     plt.title(f'Orbit Prediction for {launch_vehicle}')
 
-    # Save the plot to an in-memory buffer
+    # Save the plot to a buffer
     img = io.BytesIO()
     plt.tight_layout()
     plt.savefig(img, format='png')
     img.seek(0)
 
-    # Send the image as a response
+    # Send the image file as a response
     return send_file(img, mimetype='image/png')
 
 if __name__ == '__main__':
