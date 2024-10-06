@@ -1,6 +1,4 @@
 SL No,Launch Vehicle,Launch Date,Launch Vehicle,Orbit Type,Application,Remarks
-125,Aditya-L1,02-Sep-23,PSLV-C57/Aditya-L1 Mission,Lunar,Planetary Observation,Launch successful
-124,Chandrayaan-3,14-Jul-23,LVM3 M4 / Chandrayaan-3 Mission,Lunar,Planetary Observation,Launch successful
 123,NVS-01,29-May-23,GSLV-F12/NVS-01 Mission,,Navigation,Launch successful
 122,EOS-07,10-Feb-23,SSLV-D2/EOS-07 Mission,,Earth Observation,Launch successful
 121,Thybolt,26-Nov-22,PSLV-C54/EOS-06 Mission,,Earth Observation,Launch successful
@@ -10,7 +8,6 @@ SL No,Launch Vehicle,Launch Date,Launch Vehicle,Orbit Type,Application,Remarks
 117,EOS-06,26-Nov-22,PSLV-C54/EOS-06 Mission,,Earth Observation,Launch successful
 116,EOS-02,07-Aug-22,SSLV-D1/EOS-02 Mission,,Earth Observation,Launch successful
 115,GSAT-24,23-Jun-22,Ariane-V(VS257),GSO (Geosynchronous Orbit),Communication,Launch successful
-114,INS-2TD,14-Feb-22,PSLV-C52/EOS-04 Mission,,Experimental,Launch successful
 113,EOS-04,14-Feb-22,PSLV-C52/EOS-04 Mission,,Earth Observation,Launch successful
 112,EOS-03,12-Aug-21,GSLV-F10 / EOS-03 Mission,GTO (Geosynchronous Transfer Orbit),Earth Observation,Launch unsuccessful
 111,CMS-01,17-Dec-20,PSLV-C50/CMS-01,GSO (Geosynchronous Orbit),Communication,Launch successful
@@ -18,12 +15,10 @@ SL No,Launch Vehicle,Launch Date,Launch Vehicle,Orbit Type,Application,Remarks
 109,GSAT-30,17-Jan-20,Ariane-5 VA-251,GSO (Geosynchronous Orbit),Communication,Launch successful
 108,RISAT-2BR1,11-Dec-19,PSLV-C48/RISAT-2BR1,LEO (Low Earth Orbit),"Disaster Management System, Earth Observation",Launch successful
 107,Cartosat-3,27-Nov-19,PSLV-C47 / Cartosat-3 Mission,SSPO (Sun Synchronous Polar Orbit),Earth Observation,Launch successful
-106,Chandrayaan2,22-Jul-19,GSLV-Mk III - M1 / Chandrayaan-2 Mission,Lunar,Planetary Observation,Launch successful
 105,RISAT-2B,22-May-19,PSLV-C46 Mission,LEO (Low Earth Orbit),"Disaster Management System, Earth Observation",Launch successful
-104,EMISAT,01-Apr-19,PSLV-C45/EMISAT MISSION,SSPO (Sun Synchronous Polar Orbit),,Launch successful
+104,EMISAT,01-Apr-19,PSLV-C45/EMISAT MISSION,SSPO (Sun Synchronous Polar Orbit), Earth observation,Launch successful
 103,GSAT-31,06-Feb-19,Ariane-5 VA-247,GTO (Geosynchronous Transfer Orbit),Communication,Launch successful
-102,Microsat-R,24-Jan-19,PSLV-C44,SSPO (Sun Synchronous Polar Orbit),,Launch successful
-101,GSAT-7A,19-Dec-18,GSLV-F11 / GSAT-7A Mission,,Communication,Launch successful
+102,Microsat-R,24-Jan-19,PSLV-C44,SSPO (Sun Synchronous Polar Orbit), Earth observation,Launch successful
 100,GSAT-11 Mission,05-Dec-18,Ariane-5 VA-246,GTO (Geosynchronous Transfer Orbit),Communication,Launch successful
 99,HysIS,29-Nov-18,PSLV-C43 / HysIS Mission,SSPO (Sun Synchronous Polar Orbit),Earth Observation,Launch successful
 98,GSAT-29,14-Nov-18,GSLV Mk III-D2 / GSAT-29 Mission,GTO (Geosynchronous Transfer Orbit),Communication,Launch successful
@@ -57,7 +52,6 @@ SL No,Launch Vehicle,Launch Date,Launch Vehicle,Orbit Type,Application,Remarks
 70,IRNSS-1C,16-Oct-14,PSLV-C26/IRNSS-1C,GEO,Navigation,Launch successful
 69,IRNSS-1B,04-Apr-14,PSLV-C24/IRNSS-1B,GSO (Geosynchronous Orbit),Navigation,Launch successful
 68,GSAT-14,05-Jan-14,GSLV-D5/GSAT-14,GSO (Geosynchronous Orbit),Communication,Launch successful
-67,Mars Orbiter Mission Spacecraft,05-Nov-13,PSLV-C25,Martian,Planetary Observation,Launch successful
 66,GSAT-7,30-Aug-13,Ariane-5 VA-215,GSO (Geosynchronous Orbit),Communication,Launch successful
 65,INSAT-3D,26-Jul-13,Ariane-5 VA-214,GSO (Geosynchronous Orbit),"Climate & Environment, Disaster Management System",Launch successful
 64,IRNSS-1A,01-Jul-13,PSLV-C22/IRNSS-1A,GSO (Geosynchronous Orbit),Navigation,Launch successful
@@ -74,9 +68,8 @@ SL No,Launch Vehicle,Launch Date,Launch Vehicle,Orbit Type,Application,Remarks
 53,GSAT-4,15-Apr-10,GSLV-D3 / GSAT-4,GSO (Geosynchronous Orbit),Communication,Launch unsuccessful
 52,Oceansat-2,23-Sep-09,PSLV-C14 / OCEANSAT-2,SSPO (Sun Synchronous Polar Orbit),"Climate & Environment, Earth Observation",Launch successful
 51,RISAT-2,20-Apr-09,PSLV-C12 / RISAT-2,SSPO (Sun Synchronous Polar Orbit),Earth Observation,Launch successful
-50,Chandrayaan-1,22-Oct-08,PSLV-C11,Lunar,Planetary Observation,Launch successful
-49,IMS-1,28-Apr-08,PSLV-C9 / CARTOSAT – 2A,SSPO (Sun Synchronous Polar Orbit),Earth Observation,Launch successful
-48,CARTOSAT – 2A,28-Apr-08,PSLV-C9 / CARTOSAT – 2A,SSPO (Sun Synchronous Polar Orbit),Earth Observation,Launch successful
+49,IMS-1,28-Apr-08,PSLV-C9 / CARTOSAT â€“ 2A,SSPO (Sun Synchronous Polar Orbit),Earth Observation,Launch successful
+48,CARTOSAT â€“ 2A,28-Apr-08,PSLV-C9 / CARTOSAT â€“ 2A,SSPO (Sun Synchronous Polar Orbit),Earth Observation,Launch successful
 47,INSAT-4CR,02-Sep-07,GSLV-F04 / INSAT-4CR,GSO (Geosynchronous Orbit),Communication,Launch successful
 46,INSAT-4B,12-Mar-07,Ariane5,GSO (Geosynchronous Orbit),Communication,Decommisioned
 45,CARTOSAT-2,10-Jan-07,PSLV-C7 / CARTOSAT-2 / SRE-1,SSPO (Sun Synchronous Polar Orbit),Earth Observation,Launch successful
@@ -103,7 +96,6 @@ SL No,Launch Vehicle,Launch Date,Launch Vehicle,Orbit Type,Application,Remarks
 24,IRS-1C,28-Dec-95,Molniya,SSPO (Sun Synchronous Polar Orbit),Earth Observation,Launch successful
 23,INSAT-2C,07-Dec-95,Ariane-44L H10-3,GSO (Geosynchronous Orbit),Communication,Launch successful
 22,IRS-P2,15-Oct-94,PSLV-D2,SSPO (Sun Synchronous Polar Orbit),Earth Observation,Launch successful
-21,SROSS-C2,04-May-94,ASLV-D4,,Experimental,Launch successful
 20,IRS-1E,20-Sep-93,PSLV-D1,LEO (Low Earth Orbit),Earth Observation,Launch unsuccessful
 19,INSAT-2B,23-Jul-93,Ariane-44L H10+,GSO (Geosynchronous Orbit),Communication,Launch successful
 18,INSAT-2A,10-Jul-92,Ariane-44L H10,GSO (Geosynchronous Orbit),Communication,Launch successful
