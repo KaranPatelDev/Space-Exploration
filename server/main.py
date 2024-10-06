@@ -1,23 +1,14 @@
 from flask import Flask, request, jsonify, send_file
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder
 import matplotlib.pyplot as plt
 import io
 
 app = Flask(__name__)
 
-@app.route('/')
-def hello():
-    return jsonify({'message': 'Welcome to the Space Launch API!'}), 200
-
-# Load dataset
+# Mock dataset for launches
 data = pd.read_csv('dataset/launches.csv', encoding='latin1')
 
-# Encode orbit types
-le_orbit = LabelEncoder()
-data['Orbit_Type_Encoded'] = le_orbit.fit_transform(data['Orbit Type'].fillna('Unknown'))
-
-# Function to predict orbit location based on orbit type and application
+# Function to predict orbit location based on orbit type
 def predict_location(orbit_type):
     if orbit_type == 'Earth Observation':
         return 'Low Earth Orbit'
@@ -26,59 +17,36 @@ def predict_location(orbit_type):
     else:
         return 'Unknown Orbit'
 
-# Endpoint to get all launches
-@app.route('/launches', methods=['GET'])
-def get_launches():
-    return data.to_json(orient='records'), 200
-
-# Endpoint to get a specific launch by ID
-@app.route('/launches/<int:id>', methods=['GET'])
-def get_launch(id):
-    result = data[data['SL No'] == id]
-    if not result.empty:
-        return result.to_json(orient='records'), 200
-    else:
-        return jsonify({'message': 'Launch not found'}), 404
-
 # Endpoint to predict orbit location for a single launch
 @app.route('/predict', methods=['POST'])
 def predict():
     data_input = request.json
     orbit_type = data_input.get('Orbit Type')
-    location = predict_location(orbit_type)
+    launch_vehicle = data_input.get('Launch Vehicle')
+    predicted_location = predict_location(orbit_type)
     
-    return jsonify({'predicted_location': location}), 200
+    # Return the prediction
+    return jsonify({
+        'Launch Vehicle': launch_vehicle,
+        'predicted_location': predicted_location
+    }), 200
 
-# Endpoint to update a launch's location by ID
-@app.route('/launches/<int:id>', methods=['PUT'])
-def update_launch(id):
+# Endpoint to plot the orbit prediction for a single satellite
+@app.route('/plot-prediction', methods=['POST'])
+def plot_prediction():
     data_input = request.json
-    new_location = data_input.get('location')
+    launch_vehicle = data_input.get('Launch Vehicle')
+    orbit_type = data_input.get('Orbit Type')
 
-    index = data[data['SL No'] == id].index
-    if not index.empty:
-        data.at[index[0], 'Orbit Type'] = new_location
-        return jsonify({'message': 'Launch location updated successfully'}), 200
-    else:
-        return jsonify({'message': 'Launch not found'}), 404
+    # Predict the location using the predict function
+    predicted_location = predict_location(orbit_type)
 
-# New endpoint to generate a graph of Earth-related satellites and their predicted orbit locations
-@app.route('/plot-earth-orbits', methods=['GET'])
-def plot_earth_orbit_predictions():
-    # Filter data for satellites around Earth (e.g., Earth Observation, Navigation)
-    earth_orbits = ['Low Earth Orbit', 'Geostationary Orbit', 'Medium Earth Orbit']  # Add more if needed
-    earth_satellites = data[data['Orbit Type'].isin(earth_orbits)]
-    
-    # Create lists for satellite names and predicted orbits
-    satellite_names = earth_satellites['Launch Vehicle'].tolist()
-    orbit_predictions = earth_satellites['Orbit Type'].apply(predict_location).tolist()
-    
-    # Plot the graph using matplotlib
-    plt.figure(figsize=(10, 6))
-    plt.barh(satellite_names, orbit_predictions, color='green')
+    # Create the bar graph with the satellite name and predicted orbit
+    plt.figure(figsize=(8, 4))
+    plt.barh(launch_vehicle, predicted_location, color='blue')
     plt.xlabel('Predicted Orbit')
     plt.ylabel('Satellite Name')
-    plt.title('Earth Satellites and Predicted Orbit Locations')
+    plt.title(f'Orbit Prediction for {launch_vehicle}')
 
     # Save the plot to an in-memory buffer
     img = io.BytesIO()
