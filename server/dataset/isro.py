@@ -124,5 +124,5 @@ def main(file_path: str):
 
 if __name__ == "__main__":
     # Use an absolute path to the CSV file
-    file_path = r'dataset\ISRO mission launches.csv'
+    file_path = r'launches.csv'
     main(file_path)
