@@ -1,93 +1,191 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, jsonify
 import pandas as pd
+from flask_cors import CORS
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
-import matplotlib.pyplot as plt
-import io
+import joblib
+# import os
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
-@app.route('/')
-def hello():
-    return jsonify({'message': 'Welcome to the Space Launch API!'}), 200
+launch_data = pd.read_csv('dataset/launches.csv', encoding='latin1')
+capsule_data = pd.read_csv('dataset/SPACEX/capsules.csv', encoding='latin1')
+cores_data = pd.read_csv('dataset/SPACEX/cores.csv', encoding='latin1')
+spacex_launch_data = pd.read_csv('dataset/SPACEX/launches.csv', encoding='latin1')
+launchpad_data = pd.read_csv('dataset/SPACEX/launchpads.csv', encoding='latin1')
+payloads_data = pd.read_csv('dataset/SPACEX/payloads.csv', encoding='latin1')
+rockets_data = pd.read_csv('dataset/SPACEX/rockets.csv', encoding='latin1')
+ship_data = pd.read_csv('dataset/SPACEX/ships.csv', encoding='latin1')
 
-# Load dataset
-data = pd.read_csv('dataset/launches.csv', encoding='latin1')
+def preprocess_data(data, target_column):
+    label_encoders = {}
+    for column in data.select_dtypes(include=['object']).columns:
+        le = LabelEncoder()
+        data[column] = le.fit_transform(data[column].astype(str))
+        label_encoders[column] = le
+    X = data.drop(target_column, axis=1)
+    y = data[target_column]
+    return X, y, label_encoders
 
-# Encode orbit types
-le_orbit = LabelEncoder()
-data['Orbit_Type_Encoded'] = le_orbit.fit_transform(data['Orbit Type'].fillna('Unknown'))
+# Train model for capsule status prediction
+def train_capsule_model():
+    X, y, _ = preprocess_data(capsule_data, 'status')
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    model = RandomForestClassifier()
+    model.fit(X_train, y_train)
+    # Save the model
+    joblib.dump(model, 'models/capsule_model.pkl')
 
-# Function to predict orbit location based on orbit type and application
-def predict_location(orbit_type):
-    if orbit_type == 'Earth Observation':
-        return 'Low Earth Orbit'
-    elif orbit_type == 'Navigation':
-        return 'Geostationary Orbit'
-    else:
-        return 'Unknown Orbit'
+# Train model for core status prediction
+def train_core_model():
+    X, y, _ = preprocess_data(cores_data, 'status')
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    model = RandomForestClassifier()
+    model.fit(X_train, y_train)
+    # Save the model
+    joblib.dump(model, 'models/core_model.pkl')
 
-# Endpoint to get all launches
-@app.route('/launches', methods=['GET'])
-def get_launches():
-    return data.to_json(orient='records'), 200
+# Train model for launch application prediction
+def train_launch_model():
+    X, y, _ = preprocess_data(launch_data, 'Application')
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    model = RandomForestClassifier()
+    model.fit(X_train, y_train)
+    # Save the model
+    joblib.dump(model, 'models/launch_model.pkl')
 
-# Endpoint to get a specific launch by ID
-@app.route('/launches/<int:id>', methods=['GET'])
-def get_launch(id):
-    result = data[data['SL No'] == id]
-    if not result.empty:
-        return result.to_json(orient='records'), 200
-    else:
-        return jsonify({'message': 'Launch not found'}), 404
+# Call training functions
+train_capsule_model()
+train_core_model()
+train_launch_model()
 
-# Endpoint to predict orbit location for a single launch
-@app.route('/predict', methods=['POST'])
-def predict():
-    data_input = request.json
-    orbit_type = data_input.get('Orbit Type')
-    location = predict_location(orbit_type)
-    
-    return jsonify({'predicted_location': location}), 200
+def predict_capsule_status(model, status):
+    return 'Reusable' if status == 'active' else 'Retired'
 
-# Endpoint to update a launch's location by ID
-@app.route('/launches/<int:id>', methods=['PUT'])
-def update_launch(id):
-    data_input = request.json
-    new_location = data_input.get('location')
+def predict_core_status(model, status):
+    return 'Operational' if status == 'active' else 'Decommissioned'
 
-    index = data[data['SL No'] == id].index
-    if not index.empty:
-        data.at[index[0], 'Orbit Type'] = new_location
-        return jsonify({'message': 'Launch location updated successfully'}), 200
-    else:
-        return jsonify({'message': 'Launch not found'}), 404
+def predict_launch_application(model, application):
+    return 'Commercial' if 'Commercial' in application else 'Government'
 
-# New endpoint to generate a graph of Earth-related satellites and their predicted orbit locations
-@app.route('/plot-earth-orbits', methods=['GET'])
-def plot_earth_orbit_predictions():
-    # Filter data for satellites around Earth (e.g., Earth Observation, Navigation)
-    earth_orbits = ['Low Earth Orbit', 'Geostationary Orbit', 'Medium Earth Orbit']  # Add more if needed
-    earth_satellites = data[data['Orbit Type'].isin(earth_orbits)]
-    
-    # Create lists for satellite names and predicted orbits
-    satellite_names = earth_satellites['Launch Vehicle'].tolist()
-    orbit_predictions = earth_satellites['Orbit Type'].apply(predict_location).tolist()
-    
-    # Plot the graph using matplotlib
-    plt.figure(figsize=(10, 6))
-    plt.barh(satellite_names, orbit_predictions, color='green')
-    plt.xlabel('Predicted Orbit')
-    plt.ylabel('Satellite Name')
-    plt.title('Earth Satellites and Predicted Orbit Locations')
+def predict_payload_type(payload_type):
+    return 'Satellite' if payload_type == 'Satellite' else 'Other'
 
-    # Save the plot to an in-memory buffer
-    img = io.BytesIO()
-    plt.tight_layout()
-    plt.savefig(img, format='png')
-    img.seek(0)
+def predict_rocket_status(active):
+    return 'In Service' if active else 'Not in Service'
 
-    # Send the image as a response
-    return send_file(img, mimetype='image/png')
+def predict_ship_status(active):
+    return 'Operational' if active else 'Inactive'
+
+@app.route('/predict-capsules', methods=['POST'])
+def predict_capsules():
+    capsules = capsule_data.to_dict(orient='records')
+    predictions = []
+    model = joblib.load('models/capsule_model.pkl')
+    for capsule in capsules:
+        status = capsule.get('status')
+        predicted_status = predict_capsule_status(model, status)
+        predictions.append({
+            'Capsule ID': capsule.get('capsule_id'),
+            'Predicted Status': predicted_status
+        })
+    return jsonify(predictions), 200
+
+@app.route('/predict-cores', methods=['POST'])
+def predict_cores():
+    cores = cores_data.to_dict(orient='records')
+    predictions = []
+    model = joblib.load('models/core_model.pkl')
+    for core in cores:
+        status = core.get('status')
+        predicted_status = predict_core_status(model, status)
+        predictions.append({
+            'Core ID': core.get('core_id'),
+            'Predicted Status': predicted_status
+        })
+    return jsonify(predictions), 200
+
+@app.route('/predict-launches', methods=['POST'])
+def predict_launches():
+    launches = launch_data.to_dict(orient='records')
+    predictions = []
+    model = joblib.load('models/launch_model.pkl')
+
+    for launch in launches:
+        application = launch.get('Application')
+        
+        print(f'Processing application: {application}') 
+
+        if not isinstance(application, str):
+            return jsonify({"error": "Application field must be a string."}), 400
+        
+        try:
+            predicted_application = predict_launch_application(model, application)
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500  
+
+        predictions.append({
+            'Launch Vehicle': launch.get('Launch Vehicle'),
+            'Predicted Application': predicted_application
+        })
+        
+    return jsonify(predictions), 200
+
+
+@app.route('/predict-payloads', methods=['POST'])
+def predict_payloads():
+    payloads = payloads_data.to_dict(orient='records')
+    predictions = []
+    for payload in payloads:
+        payload_type = payload.get('type')
+        predicted_type = predict_payload_type(payload_type)
+        predictions.append({
+            'Payload ID': payload.get('payload_id'),
+            'Predicted Type': predicted_type
+        })
+    return jsonify(predictions), 200
+
+@app.route('/predict-rockets', methods=['POST'])
+def predict_rockets():
+    rockets = rockets_data.to_dict(orient='records')
+    predictions = []
+    for rocket in rockets:
+        active = rocket.get('active')
+        predicted_status = predict_rocket_status(active)
+        predictions.append({
+            'Rocket ID': rocket.get('rocket_id'),
+            'Predicted Status': predicted_status
+        })
+    return jsonify(predictions), 200
+
+@app.route('/predict-ships', methods=['POST'])
+def predict_ships():
+    ships = ship_data.to_dict(orient='records')
+    predictions = []
+    for ship in ships:
+        active = ship.get('active')
+        predicted_status = predict_ship_status(active)
+        predictions.append({
+            'Ship ID': ship.get('ship_id'),
+            'Predicted Status': predicted_status
+        })
+    return jsonify(predictions), 200
+
+@app.route('/dataset-titles', methods=['GET'])
+def get_dataset_titles():
+    titles = {
+        'launch_data': launch_data.columns.tolist(),
+        'capsule_data': capsule_data.columns.tolist(),
+        'cores_data': cores_data.columns.tolist(),
+        'spacex_launch_data': spacex_launch_data.columns.tolist(),
+        'launchpad_data': launchpad_data.columns.tolist(),
+        'payloads_data': payloads_data.columns.tolist(),
+        'rockets_data': rockets_data.columns.tolist(),
+        'ship_data': ship_data.columns.tolist(),
+    }
+    return jsonify(titles), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
