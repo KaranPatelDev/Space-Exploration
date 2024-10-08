@@ -1,90 +1,75 @@
 'use client';
-import { useEffect, useState } from 'react';
-import * as THREE from 'three';
-import axios from 'axios';
 
-// Define types for the satellite object
-interface Satellite {
-  LaunchVehicle: string;
-  OrbitType: string;
-  predicted_location: string;
-}
+import { useState, useEffect } from 'react';
 
-export default function Home() {
-  const [satellites, setSatellites] = useState<Satellite[]>([]);
+const SpaceXPrediction = () => {
+  const [launchDetails, setLaunchDetails] = useState([]);
+  const [predictionResults, setPredictionResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetching launch details from the Flask API
+  const fetchLaunchDetails = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/isro-launch-details');
+      const data = await response.json();
+      setLaunchDetails(data);
+    } catch (error) {
+      console.error('Error fetching launch details:', error);
+    }
+  };
 
   useEffect(() => {
-    // Fetch data from Flask API when the component mounts
-    const fetchSatellites = async () => {
-      try {
-        const res = await axios.post('http://localhost:5000/predict-orbits', {}, {
-          headers: { 'Content-Type': 'application/json' }
-        });
+    fetchLaunchDetails();
+  }, []);
 
-        // Use the data from the response
-        const data: Satellite[] = res.data;
-        setSatellites(data);
-      } catch (error) {
-        console.error('Error fetching satellites:', error);
-      }
-    };
-
-    fetchSatellites();
-
-    // Set up the scene, camera, and renderer
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-
-    // Create a sphere to represent the Earth
-    const earthGeometry = new THREE.SphereGeometry(1, 32, 32);
-    const earthMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const earth = new THREE.Mesh(earthGeometry, earthMaterial);
-    scene.add(earth);
-
-    // Function to create an orbit path
-    function createOrbit(radius: number) {
-      const curve = new THREE.EllipseCurve(
-        0, 0,
-        radius, radius,
-        0, 2 * Math.PI,
-        false,
-        0
-      );
-
-      const points = curve.getPoints(50);
-      const geometry = new THREE.BufferGeometry().setFromPoints(points);
-      const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
-      const orbit = new THREE.Line(geometry, material);
-      return orbit;
+  // Function to make a POST request to predict launches
+  const predictLaunches = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:5000/predict-launches', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ /* Payload for the prediction */ }),
+      });
+      const data = await response.json();
+      setPredictionResults(data);
+    } catch (error) {
+      console.error('Error predicting launches:', error);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // Add satellites and their orbits when data is fetched
-    satellites.forEach((sat: Satellite) => {
-      let orbitRadius = 3; // Default to Low Earth Orbit radius
+  return (
+    <div>
+      <h1>SpaceX Predictions</h1>
+      <button onClick={predictLaunches} disabled={loading}>
+        {loading ? 'Predicting...' : 'Predict Launches'}
+      </button>
+      
+      {predictionResults.length > 0 && (
+        <div>
+          <h2>Prediction Results:</h2>
+          <ul>
+            {predictionResults.map((result, index) => (
+              <li key={index}>
+                {result['Launch Vehicle']}: {result['Predicted Application']}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
-      if (sat.predicted_location === 'Geostationary Orbit') {
-        orbitRadius = 6;
-      } else if (sat.predicted_location === 'Medium Earth Orbit') {
-        orbitRadius = 4.5;
-      }
+      <h2>Launch Details:</h2>
+      <ul>
+        {launchDetails.launch_vehicles && launchDetails.launch_vehicles.map((vehicle, index) => (
+          <li key={index}>{vehicle}</li>
+        ))}
+      </ul>
+    </div>
+  );
+};
 
-      const orbit = createOrbit(orbitRadius);
-      scene.add(orbit);
-    });
-
-    // Set up the camera position
-    camera.position.z = 10;
-
-    // Animate the scene
-    function animate() {
-      requestAnimationFrame(animate);
-      renderer.render(scene, camera);
-    }
-    animate();
-  }, [satellites]); // Dependency array ensures this effect runs when `satellites` changes
-
-  return <div />;
-}
+export default SpaceXPrediction;
